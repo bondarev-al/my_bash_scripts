@@ -11,8 +11,23 @@ if [ ! -d "$settings_dir" ]; then
     chmod 700 "$settings_dir"
 fi 
 
+vpn_file='bmstu'
+vpn_file_pref='.vpn_'
+
 case "$1" in
     start|s|-s) echo start 
+        cd "$settings_dir"
+        if [ -e "${vpn_file_pref}${vpn_file}" ]; then
+            # читаем найстройки vpn из файла
+            for i in config login password; do
+                read $i
+            done < ${vpn_file_pref}${vpn_file}
+	    openvpn3 session-start --config "$config" <<- _EOF_
+		$login
+		$password
+		_EOF_
+		
+        fi
         ;;
     end|stop|e|-e) echo stop
         ;;
