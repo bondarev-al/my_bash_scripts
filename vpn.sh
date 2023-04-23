@@ -26,10 +26,15 @@ case "$1" in
 		$login
 		$password
 		_EOF_
-		
         fi
         ;;
     end|stop|e|-e) echo stop
+        cd "$settings_dir"
+        if [ -e "${vpn_file_pref}${vpn_file}" ]; then
+            # читаем найстройки vpn из файла
+            read config < ${vpn_file_pref}${vpn_file}
+	    openvpn3 session-manage --config "$config" --disconnect
+	fi
         ;;
     new|n|-n) echo new
         ;;
