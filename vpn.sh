@@ -72,6 +72,19 @@ case "$1" in
 	echo "$password" >> "${settings_dir}/${vpn_file_pref}${name}"
         ;;
     delete|d|-d) echo delete
+	search_mask="${settings_dir}/${vpn_file_pref}*"
+	setting_names=$( echo ${search_mask} )
+	if [ "$setting_names" != "${search_mask}" ]; then
+		i=0
+		echo "Settings list:"
+		for setting in ${setting_names//"${settings_dir}/${vpn_file_pref}"}; do
+			echo  "$(( i++ ))) $setting" 
+		done
+	else
+	       	echo "set no"
+		echo "$setting_names"
+	fi
+	
 	;;
     list|l|-l|settings) echo settings
         ;;
