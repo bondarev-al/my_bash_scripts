@@ -11,27 +11,32 @@ if [ ! -d "$settings_dir" ]; then
     chmod 700 "$settings_dir"
 fi 
 
-vpn_file='bmstu'
 vpn_file_pref='.vpn_'
+last_connection_file='.last_connection'
 
 case "$1" in
     start|s|-s) echo start 
-        cd "$settings_dir"
-        if [ -e "${vpn_file_pref}${vpn_file}" ]; then
+	if [ "$2" ]; then
+	    name=$2
+	else
+	    read name < ${settings_dir}/${last_connection_file}
+	fi
+        if [ -e "${settings_dir}/${vpn_file_pref}${name}" ]; then
             # читаем найстройки vpn из файла
             for i in config login password; do
                 read $i
-            done < ${vpn_file_pref}${vpn_file}
+            done < ${settings_dir}/${vpn_file_pref}${name}
 	    openvpn3 session-start --config "$config" <<- _EOF_
 		$login
 		$password
 		_EOF_
+            echo "$config" > ${settings_dir}/${last_connection_file}
         fi
         ;;
     end|stop|e|-e) echo stop
-        if [ -e "${settings_dir}/${vpn_file_pref}${vpn_file}" ]; then
+        if [ -e "${settings_dir}/${last_connection_file}" ]; then
             # читаем найстройки vpn из файла
-            read config < ${settings_dir}/${vpn_file_pref}${vpn_file}
+            read config < ${settings_dir}/${last_connection_file}
 	    openvpn3 session-manage --config "$config" --disconnect
 	fi
         ;;
@@ -66,6 +71,8 @@ case "$1" in
 	echo "$login" >> "${settings_dir}/${vpn_file_pref}${name}"
 	echo "$password" >> "${settings_dir}/${vpn_file_pref}${name}"
         ;;
+    delete|d|-d) echo delete
+	;;
     list|l|-l|settings) echo settings
         ;;
     help|-h|--help) echo help
