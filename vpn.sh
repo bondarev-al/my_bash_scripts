@@ -31,6 +31,10 @@ case "$1" in
 		$password
 		_EOF_
             echo "$config" > ${settings_dir}/${last_connection_file}
+	else
+		echo "$PROGRAM_NAME: Error. Setting file '$name' don't exist." >&2
+		exit 4
+
         fi
         ;;
     end|stop|e|-e) echo stop
