@@ -30,7 +30,7 @@ case "$1" in
 		$login
 		$password
 		_EOF_
-            echo "$config" > ${settings_dir}/${last_connection_file}
+            echo "$name" > ${settings_dir}/${last_connection_file}
 	else
 		echo "$PROGRAM_NAME: Error. Setting file '$name' don't exist." >&2
 		exit 4
@@ -40,7 +40,8 @@ case "$1" in
     end|stop|e|-e) echo stop
         if [ -e "${settings_dir}/${last_connection_file}" ]; then
             # читаем найстройки vpn из файла
-            read config < ${settings_dir}/${last_connection_file}
+            read name < ${settings_dir}/${last_connection_file}
+            read config < ${settings_dir}/${vpn_file_pref}${name}
 	    openvpn3 session-manage --config "$config" --disconnect
 	fi
         ;;
@@ -74,6 +75,7 @@ case "$1" in
 	echo "$name" > "${settings_dir}/${vpn_file_pref}${name}"
 	echo "$login" >> "${settings_dir}/${vpn_file_pref}${name}"
 	echo "$password" >> "${settings_dir}/${vpn_file_pref}${name}"
+	chmod 600 "${settings_dir}/${vpn_file_pref}${name}"
         ;;
     delete|d|-d) echo delete
 	search_mask="${settings_dir}/${vpn_file_pref}*"
@@ -87,7 +89,9 @@ case "$1" in
 		read -p "Enter setting number for deletion: "
 		if [[ $REPLY =~ ^[[:digit:]]+$  ]]; then
 			if (( -1 < $REPLY && $REPLY < ${#setting_array[@]} )); then
-			       	rm "${setting_array[$REPLY]}"
+				read config < "${setting_array[$REPLY]}"
+				openvpn3 config-remove --config "$config" <<< "YES" > /dev/null
+				rm "${setting_array[$REPLY]}"
 				echo "File '${setting_array[$REPLY]}' deleted."
 			else
 				echo "$PROGRAM_NAME: Error. No such number." >&2
