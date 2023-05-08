@@ -73,18 +73,29 @@ case "$1" in
         ;;
     delete|d|-d) echo delete
 	search_mask="${settings_dir}/${vpn_file_pref}*"
-	setting_names=$( echo ${search_mask} )
-	if [ "$setting_names" != "${search_mask}" ]; then
+	setting_array=( $( echo ${search_mask} )  )
+	if [ "$setting_array" != "${search_mask}" ]; then
 		i=0
 		echo "Settings list:"
-		for setting in ${setting_names//"${settings_dir}/${vpn_file_pref}"}; do
+		for setting in ${setting_array[@]//"${settings_dir}/${vpn_file_pref}"}; do
 			echo  "$(( i++ ))) $setting" 
 		done
+		read -p "Enter setting number for deletion: "
+		if [[ $REPLY =~ ^[[:digit:]]+$  ]]; then
+			if (( -1 < $REPLY && $REPLY < ${#setting_array[@]} )); then
+			       	rm "${setting_array[$REPLY]}"
+				echo "File '${setting_array[$REPLY]}' deleted."
+			else
+				echo "$PROGRAM_NAME: Error. No such number." >&2
+				exit 3
+			fi
+		else
+			echo "$PROGRAM_NAME: Error. It's not a number." >&2
+			exit 3
+		fi
 	else
-	       	echo "set no"
-		echo "$setting_names"
+	       	echo "You don't have setting file. You can create it use parameter new|-n|n."
 	fi
-	
 	;;
     list|l|-l|settings) echo settings
         ;;
