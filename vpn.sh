@@ -13,6 +13,17 @@ fi
 
 vpn_file_pref='.vpn_'
 last_connection_file='.last_connection'
+settings_array=
+
+findSettings () {
+	search_mask="${settings_dir}/${vpn_file_pref}*"
+	settings_array=( $( echo ${search_mask} )  )
+	if [ "$find_setting_array" != "${search_mask}" ]; then
+		return 0
+	else 
+		return 1
+	fi
+}
 
 case "$1" in
     start|s|-s) echo start 
@@ -78,21 +89,19 @@ case "$1" in
 	chmod 600 "${settings_dir}/${vpn_file_pref}${name}"
         ;;
     delete|d|-d) echo delete
-	search_mask="${settings_dir}/${vpn_file_pref}*"
-	setting_array=( $( echo ${search_mask} )  )
-	if [ "$setting_array" != "${search_mask}" ]; then
+	if findSettings; then
 		i=0
 		echo "Settings list:"
-		for setting in ${setting_array[@]//"${settings_dir}/${vpn_file_pref}"}; do
+		for setting in ${settings_array[@]//"${settings_dir}/${vpn_file_pref}"}; do
 			echo  "$(( i++ ))) $setting" 
 		done
 		read -p "Enter setting number for deletion: "
 		if [[ $REPLY =~ ^[[:digit:]]+$  ]]; then
-			if (( -1 < $REPLY && $REPLY < ${#setting_array[@]} )); then
-				read config < "${setting_array[$REPLY]}"
+			if (( -1 < $REPLY && $REPLY < ${#settings_array[@]} )); then
+				read config < "${settings_array[$REPLY]}"
 				openvpn3 config-remove --config "$config" <<< "YES" > /dev/null
-				rm "${setting_array[$REPLY]}"
-				echo "File '${setting_array[$REPLY]}' deleted."
+				rm "${settings_array[$REPLY]}"
+				echo "File '${settings_array[$REPLY]}' deleted."
 			else
 				echo "$PROGRAM_NAME: Error. No such number." >&2
 				exit 3
