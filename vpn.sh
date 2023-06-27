@@ -25,6 +25,21 @@ findSettings () {
 	fi
 }
 
+printSettings () {
+	if findSettings; then
+		i=0
+		echo "Settings list:"
+		for setting in ${settings_array[@]//"${settings_dir}/${vpn_file_pref}"}; do
+			echo  "$(( i++ ))) $setting" 
+		done
+		return 0
+	else
+	       	echo "You don't have setting file. You can create it use parameter new|-n|n."
+		return 1
+	fi
+	
+}
+
 case "$1" in
     start|s|-s) echo start 
 	if [ "$2" ]; then
@@ -89,12 +104,7 @@ case "$1" in
 	chmod 600 "${settings_dir}/${vpn_file_pref}${name}"
         ;;
     delete|d|-d) echo delete
-	if findSettings; then
-		i=0
-		echo "Settings list:"
-		for setting in ${settings_array[@]//"${settings_dir}/${vpn_file_pref}"}; do
-			echo  "$(( i++ ))) $setting" 
-		done
+	if printSettings; then
 		read -p "Enter setting number for deletion: "
 		if [[ $REPLY =~ ^[[:digit:]]+$  ]]; then
 			if (( -1 < $REPLY && $REPLY < ${#settings_array[@]} )); then
@@ -110,11 +120,10 @@ case "$1" in
 			echo "$PROGRAM_NAME: Error. It's not a number." >&2
 			exit 3
 		fi
-	else
-	       	echo "You don't have setting file. You can create it use parameter new|-n|n."
 	fi
 	;;
     list|l|-l|settings) echo settings
+	printSettings
         ;;
     help|-h|--help) echo help
         ;;
