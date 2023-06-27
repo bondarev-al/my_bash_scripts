@@ -18,7 +18,7 @@ settings_array=
 findSettings () {
 	search_mask="${settings_dir}/${vpn_file_pref}*"
 	settings_array=( $( echo ${search_mask} )  )
-	if [ "$find_setting_array" != "${search_mask}" ]; then
+	if [ "$settings_array" != "${search_mask}" ]; then
 		return 0
 	else 
 		return 1
